@@ -2,14 +2,12 @@
 
 const Code = require('code')
 const Lab = require('lab')
-const lab       = exports.lab = Lab.script()
+const lab = exports.lab = Lab.script()
 
-const describe    = lab.describe
-const it          = lab.it
-const before      = lab.before
-const beforeEach  = lab.beforeEach
-const after       = lab.after
-const expect      = Code.expect
+const describe = lab.describe
+const it = lab.it
+const beforeEach = lab.beforeEach
+const expect = Code.expect
 
 // dependencies
 const galaxy = require('../lib')
@@ -20,10 +18,10 @@ const galaxyRoute = {
   method: 'GET',
   handler: {
     galaxy: {
-      component(props, location) {
+      component (props, location) {
         const msg = props.msg || 'world'
-        return new Promise(fulfill => {
-          fulfill(`<div>hello ${msg}!</div>`)
+        return new Promise((resolve, reject) => {
+          resolve(`<div>hello ${msg}!</div>`)
         })
       }
     }
@@ -84,6 +82,7 @@ describe('Hapi-Galaxy', () => {
       beforeEach(done => {
         server.connection({ port: 8000 })
         server.register([ require('vision'), view ], err => {
+          expect(err).to.be.undefined()
           server.views({
             engines: { html: require('ejs') },
             relativeTo: __dirname,
@@ -142,7 +141,7 @@ describe('Hapi-Galaxy', () => {
         route.config = {
           pre: [{
             assign: 'props',
-            method(request, reply) {
+            method (request, reply) {
               reply({ msg: 'foo' })
             }
           }]
@@ -166,14 +165,12 @@ describe('Hapi-Galaxy', () => {
           done()
         })
       })
-
     })
-
 
     it('throws errors from the route handler', done => {
       route.handler = {
         galaxy: {
-          component(props, location) {
+          component (props, location) {
             return new Promise((resolve, reject) => reject('Render error!'))
           }
         }
@@ -187,5 +184,4 @@ describe('Hapi-Galaxy', () => {
       })
     })
   })
-
 })
