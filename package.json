@@ -1,0 +1,26 @@
+{
+  "name": "hapi-galaxy",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "lab -c test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "code": "^4.0.0",
+    "ejs": "^2.5.2",
+    "hapi": "^15.2.0",
+    "lab": "^11.2.1",
+    "vision": "^4.1.0"
+  },
+  "dependencies": {
+    "hoek": "^4.1.0",
+    "joi": "^10.0.1"
+  }
+}
