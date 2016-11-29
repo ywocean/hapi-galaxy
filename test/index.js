@@ -94,7 +94,6 @@ describe('Hapi-Galaxy', () => {
 
       it('uses the layout template in the handler', done => {
         server.route(route)
-
         server.inject({ method: 'GET', url: '/' }, res => {
           expect(res.statusCode).to.equal(200)
           expect(res.payload).to.include('hello world!')
@@ -109,8 +108,8 @@ describe('Hapi-Galaxy', () => {
             view: 'layout.html'
           }
         }
-        server.route(route)
 
+        server.route(route)
         server.inject({ method: 'GET', url: '/' }, res => {
           expect(res.statusCode).to.equal(200)
           expect(res.payload).to.include('hello world!')
@@ -128,7 +127,6 @@ describe('Hapi-Galaxy', () => {
 
     it('renders a generic component', done => {
       server.route(route)
-
       server.inject({ method: 'GET', url: '/' }, res => {
         expect(res.statusCode).to.equal(200)
         expect(res.payload).to.include('hello world!')
@@ -177,7 +175,6 @@ describe('Hapi-Galaxy', () => {
       }
 
       server.route(route)
-
       server.inject({ method: 'GET', url: '/' }, res => {
         expect(res.statusCode).to.equal(500)
         done()
