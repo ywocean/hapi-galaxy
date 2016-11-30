@@ -164,7 +164,7 @@ describe('Hapi-Galaxy', () => {
     })
 
     it('rejects invalid configuration', done => {
-      route.handler = function (request, reply ) {
+      route.handler = function (request, reply) {
         reply.galaxy(Component, { layout: 'should throw' })
       }
 
