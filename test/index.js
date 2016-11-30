@@ -10,30 +10,36 @@ const beforeEach = lab.beforeEach
 const expect = Code.expect
 
 // dependencies
+const Hoek = require('hoek')
 const galaxy = require('../lib')
 const Hapi = require('hapi')
 
+const Component = (props, location) => {
+  const msg = props.msg || 'world'
+  return new Promise((resolve, reject) => {
+    resolve(`<div>hello ${msg}!</div>`)
+  })
+}
 const galaxyRoute = {
   path: '/',
   method: 'GET',
   handler: {
     galaxy: {
-      component (props, location) {
-        const msg = props.msg || 'world'
-        return new Promise((resolve, reject) => {
-          resolve(`<div>hello ${msg}!</div>`)
-        })
-      }
+      component: Component
     }
   }
 }
 
 describe('Hapi-Galaxy', () => {
   let server, route
+  const injectRoute = (r, cb) => {
+    server.route(r)
+    server.inject({ method: 'GET', url: '/' }, cb)
+  }
 
   beforeEach(done => {
     server = new Hapi.Server()
-    route = Object.assign({}, galaxyRoute)
+    route = Hoek.clone(galaxyRoute)
     done()
   })
 
@@ -56,7 +62,120 @@ describe('Hapi-Galaxy', () => {
     })
   })
 
-  describe('settings.view', () => {
+  describe('custom handler:', () => {
+    beforeEach(done => {
+      server.connection({ port: 8000 })
+      server.register(galaxy, done)
+    })
+
+    it('renders a generic component', done => {
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(200)
+        expect(res.payload).to.include('hello world!')
+        done()
+      })
+    })
+
+    it('rejects invlaid configuration', done => {
+      route.handler.galaxy.layout = 'should throw'
+      expect(function () { server.route(route) }).to.throw()
+      done()
+    })
+
+    describe('options.props', () => {
+      it('uses props from request.pre.props', done => {
+        route.config = {
+          pre: [{
+            assign: 'props',
+            method (request, reply) {
+              reply({ msg: 'foo' })
+            }
+          }]
+        }
+
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.include('hello foo!')
+          done()
+        })
+      })
+
+      it('uses props passed to route handler', done => {
+        route.handler.galaxy.props = { msg: 'foo' }
+
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.include('hello foo!')
+          done()
+        })
+      })
+    })
+
+    it('throws errors from the route handler', done => {
+      route.handler = {
+        galaxy: {
+          component (props, location) {
+            return new Promise((resolve, reject) => reject('Render error!'))
+          }
+        }
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(500)
+        done()
+      })
+    })
+
+    describe('options.layout', () => {
+      it('uses layout passed to route handler', done => {
+        route.handler.galaxy.layout = function () {
+          return 'custom layout'
+        }
+
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.include('custom layout')
+          done()
+        })
+      })
+    })
+  })
+
+  describe('decorator: reply.galaxy', () => {
+    beforeEach(done => {
+      server.connection({ port: 8000 })
+      server.register(galaxy, done)
+    })
+
+    it('is available on the reply interface', done => {
+      route.handler = function (request, reply) {
+        reply.galaxy(Component, {
+          props: {
+            msg: 'foo'
+          }
+        })
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(200)
+        expect(res.payload).to.include('hello foo!')
+        done()
+      })
+    })
+
+    it('rejects invalid configuration', done => {
+      route.handler = function (request, reply ) {
+        reply.galaxy(Component, { layout: 'should throw' })
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(500)
+        done()
+      })
+    })
+  })
+
+  describe('plugin: options.view', () => {
     const view = {
       register: galaxy,
       options: {
@@ -78,7 +197,7 @@ describe('Hapi-Galaxy', () => {
       })
     })
 
-    describe('handler', () => {
+    describe('custom view options', () => {
       beforeEach(done => {
         server.connection({ port: 8000 })
         server.register([ require('vision'), view ], err => {
@@ -93,8 +212,7 @@ describe('Hapi-Galaxy', () => {
       })
 
       it('uses the layout template in the handler', done => {
-        server.route(route)
-        server.inject({ method: 'GET', url: '/' }, res => {
+        injectRoute(route, res => {
           expect(res.statusCode).to.equal(200)
           expect(res.payload).to.include('hello world!')
           done()
@@ -109,75 +227,11 @@ describe('Hapi-Galaxy', () => {
           }
         }
 
-        server.route(route)
-        server.inject({ method: 'GET', url: '/' }, res => {
+        injectRoute(route, res => {
           expect(res.statusCode).to.equal(200)
           expect(res.payload).to.include('hello world!')
           done()
         })
-      })
-    })
-  })
-
-  describe('galaxy handler', () => {
-    beforeEach(done => {
-      server.connection({ port: 8000 })
-      server.register(galaxy, done)
-    })
-
-    it('renders a generic component', done => {
-      server.route(route)
-      server.inject({ method: 'GET', url: '/' }, res => {
-        expect(res.statusCode).to.equal(200)
-        expect(res.payload).to.include('hello world!')
-        done()
-      })
-    })
-
-    describe('props', () => {
-      it('uses props from request.pre.props', done => {
-        route.config = {
-          pre: [{
-            assign: 'props',
-            method (request, reply) {
-              reply({ msg: 'foo' })
-            }
-          }]
-        }
-
-        server.route(route)
-        server.inject({ method: 'GET', url: '/' }, res => {
-          expect(res.statusCode).to.equal(200)
-          expect(res.payload).to.include('hello foo!')
-          done()
-        })
-      })
-
-      it('uses props passed to handler config', done => {
-        route.handler.galaxy.props = { msg: 'foo' }
-
-        server.route(route)
-        server.inject({ method: 'GET', url: '/' }, res => {
-          expect(res.statusCode).to.equal(200)
-          expect(res.payload).to.include('hello foo!')
-          done()
-        })
-      })
-    })
-
-    it('throws errors from the route handler', done => {
-      route.handler = {
-        galaxy: {
-          component (props, location) {
-            return new Promise((resolve, reject) => reject('Render error!'))
-          }
-        }
-      }
-
-      server.route(route)
-      server.inject({ method: 'GET', url: '/' }, res => {
-        expect(res.statusCode).to.equal(500)
-        done()
       })
     })
   })
