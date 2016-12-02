@@ -205,7 +205,7 @@ describe('Hapi-Galaxy', () => {
           server.views({
             engines: { html: require('ejs') },
             relativeTo: __dirname,
-            path: 'templates'
+            path: 'fixtures'
           })
           done()
         })
