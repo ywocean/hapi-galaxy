@@ -1,7 +1,8 @@
 'use strict'
 
-const Component = function (props) {
-  throw new Error('😳')
+module.exports = (props, location) => {
+  const msg = props.msg || 'world'
+  return new Promise((resolve, reject) => {
+    throw new Error('😳')
+  })
 }
-
-module.exports = Component

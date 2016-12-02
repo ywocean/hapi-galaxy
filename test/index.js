@@ -10,16 +10,13 @@ const beforeEach = lab.beforeEach
 const expect = Code.expect
 
 // dependencies
+const path = require('path')
 const Hoek = require('hoek')
 const galaxy = require('../lib')
 const Hapi = require('hapi')
 
-const Component = (props, location) => {
-  const msg = props.msg || 'world'
-  return new Promise((resolve, reject) => {
-    resolve(`<div>hello ${msg}!</div>`)
-  })
-}
+const Component = require('./fixtures/Component')
+
 const galaxyRoute = {
   path: '/',
   method: 'GET',
@@ -111,6 +108,26 @@ describe('Hapi-Galaxy', () => {
       })
     })
 
+    describe('options.component — string value', () => {
+      it('automatically loads components', done => {
+        route.handler.galaxy.component = path.join(__dirname, 'fixtures', 'Component')
+        route.handler.galaxy.props = { msg: 'world' }
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.include('hello world!')
+          done()
+        })
+      })
+
+      it('rejects promise when encountering a render error', done => {
+        route.handler.galaxy.component = path.join(__dirname, 'fixtures', 'BadComponent')
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(500)
+          done()
+        })
+      })
+    })
+
     it('throws errors from the route handler', done => {
       route.handler = {
         galaxy: {
@@ -170,6 +187,18 @@ describe('Hapi-Galaxy', () => {
 
       injectRoute(route, res => {
         expect(res.statusCode).to.equal(500)
+        done()
+      })
+    })
+
+    it('automatically requires components if a module name string is provided', done => {
+      route.handler = function (request, reply) {
+        const moduleName = path.join(__dirname, 'fixtures', 'Component')
+        reply.galaxy(moduleName)
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(200)
         done()
       })
     })

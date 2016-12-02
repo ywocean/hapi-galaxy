@@ -1,9 +1,8 @@
 'use strict'
 
-const React = require('react')
-
-const Component = function (props) {
-  return React.createElement('div', {}, `hello ${props.msg}!`)
+module.exports = (props, location) => {
+  const msg = props.msg || 'world'
+  return new Promise((resolve, reject) => {
+    resolve(`<div>hello ${msg}!</div>`)
+  })
 }
-
-module.exports = Component
