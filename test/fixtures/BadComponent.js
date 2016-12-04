@@ -1,7 +1,6 @@
 'use strict'
 
-module.exports = (props, location) => {
-  const msg = props.msg || 'world'
+module.exports = () => {
   return new Promise((resolve, reject) => {
     throw new Error('😳')
   })
