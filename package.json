@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "version": "standard-version",
+    "release": "standard-version",
     "lint": "standard",
     "test": "lab -c test"
   },
