@@ -117,7 +117,7 @@ server.route({
 })
 ```
 
-This provides several benefits over error-first callbacks for our use-case:
+This has several benefits over error-first callbacks for our use-case:
 
 1. It provides a consistent way of preventing client code from throwing errors in your server process. Consider the following:
   * The server is a _secondary_ runtime for the code being rendered and therefore it would be inappropriate to let the client code _throw_ errors.
