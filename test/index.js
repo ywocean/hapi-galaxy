@@ -161,6 +161,16 @@ describe('Hapi-Galaxy', () => {
           done()
         })
       })
+
+      it('layout: false bypasses layout render', done => {
+        route.handler.galaxy.layout = false
+
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.not.include('<html>')
+          done()
+        })
+      })
     })
 
     describe('options.view', () => {
