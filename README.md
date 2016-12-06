@@ -31,7 +31,7 @@ Use **hapi-galaxy** to transform any front-end component into server-rendered ou
 Install **hapi-galaxy** and add it to your Hapi.js project's dependencies
 
 ```
-npm install hapi-galaxy --save
+npm install @creditkarma/hapi-galaxy --save
 ```
 
 Then, register the plugin with your Hapi.js server:
@@ -51,7 +51,6 @@ server.register(require('hapi-galaxy'), pluginErr => {
   })
 
   server.start((err) => {
-
     console.log(`Server started at: ${server.info.uri}`);
   })
 })
