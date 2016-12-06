@@ -27,6 +27,12 @@ const galaxyRoute = {
   }
 }
 
+const viewSettings = {
+  engines: { html: require('ejs') },
+  relativeTo: __dirname,
+  path: 'fixtures'
+}
+
 describe('Hapi-Galaxy', () => {
   let server, route
   const injectRoute = (r, cb) => {
@@ -79,6 +85,21 @@ describe('Hapi-Galaxy', () => {
       done()
     })
 
+    it('throws errors from the route handler', done => {
+      route.handler = {
+        galaxy: {
+          component (props, location) {
+            return new Promise((resolve, reject) => reject('Render error!'))
+          }
+        }
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(500)
+        done()
+      })
+    })
+
     describe('options.props', () => {
       it('uses props from request.pre.props', done => {
         route.config = {
@@ -128,21 +149,6 @@ describe('Hapi-Galaxy', () => {
       })
     })
 
-    it('throws errors from the route handler', done => {
-      route.handler = {
-        galaxy: {
-          component (props, location) {
-            return new Promise((resolve, reject) => reject('Render error!'))
-          }
-        }
-      }
-
-      injectRoute(route, res => {
-        expect(res.statusCode).to.equal(500)
-        done()
-      })
-    })
-
     describe('options.layout', () => {
       it('uses layout passed to route handler', done => {
         route.handler.galaxy.layout = function () {
@@ -152,6 +158,26 @@ describe('Hapi-Galaxy', () => {
         injectRoute(route, res => {
           expect(res.statusCode).to.equal(200)
           expect(res.payload).to.include('custom layout')
+          done()
+        })
+      })
+    })
+
+    describe('options.view', () => {
+      beforeEach(done => {
+        server.register(require('vision'), err => {
+          expect(err).to.be.undefined()
+          server.views(viewSettings)
+          done()
+        })
+      })
+
+      it('uses a custom view passed to the handler', done => {
+        route.handler.galaxy.view = 'layout.html'
+
+        injectRoute(route, res => {
+          expect(res.statusCode).to.equal(200)
+          expect(res.payload).to.include(['<title>Custom View!</title>', 'hello world!'])
           done()
         })
       })
@@ -231,34 +257,27 @@ describe('Hapi-Galaxy', () => {
         server.connection({ port: 8000 })
         server.register([ require('vision'), view ], err => {
           expect(err).to.be.undefined()
-          server.views({
-            engines: { html: require('ejs') },
-            relativeTo: __dirname,
-            path: 'fixtures'
-          })
+          server.views(viewSettings)
           done()
         })
       })
 
-      it('uses the layout template in the handler', done => {
+      it('defaults to the view supplied in the plugin config', done => {
         injectRoute(route, res => {
           expect(res.statusCode).to.equal(200)
-          expect(res.payload).to.include('hello world!')
+          expect(res.payload).to.include(['<title>Custom View!</title>', 'hello world!'])
           done()
         })
       })
 
-      it('uses the layout passed in from the route config', done => {
-        route.handler = {
-          galaxy: {
-            component: galaxyRoute.handler.galaxy.component,
-            view: 'layout.html'
-          }
+      it('uses the view template in the handler', done => {
+        route.handler = function (request, reply) {
+          reply.galaxy(Component, {})
         }
 
         injectRoute(route, res => {
           expect(res.statusCode).to.equal(200)
-          expect(res.payload).to.include('hello world!')
+          expect(res.payload).to.include(['<title>Custom View!</title>', 'hello world!'])
           done()
         })
       })
