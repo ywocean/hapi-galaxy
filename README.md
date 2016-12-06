@@ -11,7 +11,9 @@ Use **hapi-galaxy** to transform any front-end component into server-rendered ou
 ## Motivations
 
 1. Provide a bridge between Credit Karma's server side JavaScript rendering conventions and our Node.js Web App servers.
-2. Lay the groundwork for programmatic integration with [Next.js][next.js] or any other that exports an interface for server side renders (ember fastboot, etc.).
+2. Lay the groundwork for programmatic integration with [Next.js][next.js] or any other framework that exports an interface for server side rendering (ember fastboot, etc.).
+
+[next.js]: https://github.com/zeit/next.js
 
 ## Assumptions
 
@@ -61,7 +63,10 @@ The galaxy handler object has the following properties:
 
 * `component` — a string with the name of the module to use when `require`'ing your FE code, or function with the signature `function(props, location)` which returns a promise that resolves with the rendered output of your component.  
   * See the [client interface guidelines](#client-interface) for more details.
-* `layout` – function with the signature `function(props, children)` to provide the document which encapsulates your component output. _Will be ignored if `view` option is provided._
+* `layout` – function with the signature `function(props, children)` which wraps your component output, presumably with in an HTML document with head and body tags
+  * If no layout function is provided a generic HTML 5 layout will be used.
+  * `layout: false` will disable the default view.
+  * _Will be ignored if `view` option is provided._
 * `path` — current url being requested. Useful for handling route logic within a bundled component.
 * `props` — object containing any additional properties to be passed to the view.
 * `view` – string corresponding to the [vision][vision] view template to be used.
@@ -70,7 +75,7 @@ The galaxy handler object has the following properties:
 
 ### `reply.galaxy(component, options)`
 
-* `component` — a string or function
+* `component` — a string or function, following the same restrictions as the `component` option defined above
 * `options` — an object including the same keys and restrictions defined by the
  [route `galaxy` handler options](#options), excluding the component
 
@@ -111,3 +116,15 @@ server.route({
   }
 })
 ```
+
+This provides several benefits over error-first callbacks for our use-case:
+
+1. It provides a consistent way of preventing client code from throwing errors in your server process. Consider the following:
+  * The server is a _secondary_ runtime for the code being rendered and therefore it would be inappropriate to let the client code _throw_ errors.
+  * We're delegating the render method to the client code, error-first callbacks would require a try/catch to do correctly.
+  * Error-swallowing becomes a feature as it provides de facto encapsulation.
+2. Promises are a requirement for using [fetch][fetch] and [associated](https://github.com/matthew-andrews/isomorphic-fetch) [libraries](https://github.com/mjackson/http-client)).
+3. [Async/await][async] will be ready soon without compilation and it's interface is compatible with promises. [Next.js][next.js] uses this pattern to great effect and it contributes to a really nice developer experience.
+
+[async]: https://github.com/tc39/ecmascript-asyncawait
+[fetch]: https://fetch.spec.whatwg.org/
