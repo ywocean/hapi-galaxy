@@ -62,13 +62,13 @@ The galaxy handler object has the following properties:
 
 * `component` — a string with the name of the module to use when `require`'ing your FE code, or function with the signature `function(props, location)` which returns a promise that resolves with the rendered output of your component.  
   * See the [client interface guidelines](#client-interface) for more details.
-* `layout` – function with the signature `function(props, children)` which wraps your component output, presumably with in an HTML document with head and body tags
+* `layout` – function with the signature `function(props, content)` which wraps your component output, presumably with in an HTML document with head and body tags
   * If no layout function is provided a generic HTML 5 layout will be used.
   * `layout: false` will disable the default view.
   * _Will be ignored if `view` option is provided._
 * `path` — current url being requested. Useful for handling route logic within a bundled component.
 * `props` — object containing any additional properties to be passed to the view.
-* `view` – string corresponding to the [vision][vision] view template to be used.
+* `view` – string corresponding to the [vision][vision] view template to be used. The view template with be the output of the render and props used as `content` and `props`, respectively.
 
 [vision]: https://github.com/hapijs/vision
 
