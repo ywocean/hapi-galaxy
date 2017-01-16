@@ -74,7 +74,7 @@ describe('Hapi-Galaxy', () => {
     it('renders a generic component', done => {
       injectRoute(route, res => {
         expect(res.statusCode).to.equal(200)
-        expect(res.payload).to.include('hello world!')
+        expect(res.payload).to.include(`<div id="__galaxy"><div>hello world!</div></div>`)
         done()
       })
     })
