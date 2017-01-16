@@ -88,14 +88,28 @@ describe('Hapi-Galaxy', () => {
     it('throws errors from the route handler', done => {
       route.handler = {
         galaxy: {
-          component (props, location) {
-            return new Promise((resolve, reject) => reject('Render error!'))
-          }
+          component: () => Promise.reject('Render error!')
         }
       }
 
       injectRoute(route, res => {
         expect(res.statusCode).to.equal(500)
+        done()
+      })
+    })
+
+    it('detects es6 modules with a function on the `default` key', done => {
+      route.handler = {
+        galaxy: {
+          component: {
+            default: () => Promise.resolve('hello world!')
+          }
+        }
+      }
+
+      injectRoute(route, res => {
+        expect(res.statusCode).to.equal(200)
+        expect(res.payload).to.include('hello world!')
         done()
       })
     })
