@@ -1,0 +1,27 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-preset-env": "^1.1.8",
+    "babel-preset-react": "^6.16.0",
+    "babili-webpack-plugin": "0.0.7",
+    "fetch-everywhere": "^1.0.5",
+    "isomorphic-fetch": "^2.2.1",
+    "json-loader": "^0.5.4",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "webpack": "^1.14.0"
+  }
+}

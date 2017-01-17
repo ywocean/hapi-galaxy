@@ -10,7 +10,8 @@
   "scripts": {
     "release": "standard-version",
     "lint": "standard",
-    "test": "lab -c test"
+    "test": "lab -c test",
+    "example": "pushd example/client && npm install && npm run build && popd && node example/server"
   },
   "keywords": [
     "view",
@@ -26,6 +27,7 @@
     "code": "^4.0.0",
     "ejs": "^2.5.2",
     "hapi": "^15.2.0",
+    "isomorphic-fetch": "^2.2.1",
     "lab": "^11.2.1",
     "standard": "^8.6.0",
     "standard-version": "^4.0.0",
