@@ -13,6 +13,9 @@ server.connection({
 server.register([
   require('../lib')
 ], pluginErr => {
+  if (pluginErr) {
+    throw pluginErr
+  }
 
   server.route({
     path: '/',
@@ -24,7 +27,7 @@ server.register([
     }
   })
 
-  server.start(err => {
+  server.start(() => {
     console.log(`Server started on port ${server.info.port}`)
   })
 })
