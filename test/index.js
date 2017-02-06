@@ -159,7 +159,7 @@ describe('Hapi-Galaxy', () => {
           reply.galaxy(path.join(__dirname, 'fixtures', 'BadComponent'), {
             props: {}
           },
-          function(err) {
+          function (err) {
             expect(err).to.not.be.null()
           })
         }
