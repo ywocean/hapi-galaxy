@@ -155,7 +155,15 @@ describe('Hapi-Galaxy', () => {
       })
 
       it('rejects promise when encountering a render error', done => {
-        route.handler.galaxy.component = path.join(__dirname, 'fixtures', 'BadComponent')
+        route.handler = function (request, reply) {
+          reply.galaxy(path.join(__dirname, 'fixtures', 'BadComponent'), {
+            props: {}
+          },
+          function(err) {
+            expect(err).to.not.be.null()
+          })
+        }
+
         injectRoute(route, res => {
           expect(res.statusCode).to.equal(500)
           done()
