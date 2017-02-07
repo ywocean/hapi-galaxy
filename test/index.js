@@ -161,6 +161,7 @@ describe('Hapi-Galaxy', () => {
           },
           function (err) {
             expect(err).to.not.be.null()
+            done()
           })
         }
 

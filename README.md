@@ -72,11 +72,12 @@ The galaxy handler object has the following properties:
 
 [vision]: https://github.com/hapijs/vision
 
-### `reply.galaxy(component, options)`
+### `reply.galaxy(component, options, errorCallback)`
 
 * `component` — a string or function, following the same restrictions as the `component` option defined above
 * `options` — an object including the same keys and restrictions defined by the
  [route `galaxy` handler options](#options), excluding the component
+* `errorCallback` — a function with the signature `function(err)` which should handle the error returned
 
 ## Client Interface
 
